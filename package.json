@@ -8,7 +8,7 @@
     "import:approved": "node scripts/import-approved.js",
     "cf:bootstrap": "bash ./scripts/setup-cloudflare.sh",
     "cf:set-secrets": "bash ./scripts/set-cloudflare-secrets.sh",
-    "cf:deploy": "cd cloudflare-worker && wrangler deploy"
+    "cf:deploy": "cd cloudflare-worker && wrangler deploy --config wrangler.toml"
   },
   "dependencies": {}
 }

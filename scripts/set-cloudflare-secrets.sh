@@ -6,6 +6,9 @@ set -euo pipefail
 #   ./scripts/set-cloudflare-secrets.sh cloudflare-worker/.secrets.env
 
 ENV_FILE="${1:-cloudflare-worker/.secrets.env}"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORKER_DIR="${ROOT_DIR}/cloudflare-worker"
+WRANGLER_TOML="${WORKER_DIR}/wrangler.toml"
 
 if [[ ! -f "${ENV_FILE}" ]]; then
   echo "Missing env file: ${ENV_FILE}"
@@ -15,6 +18,12 @@ fi
 
 if ! command -v wrangler >/dev/null 2>&1; then
   echo "Wrangler not found. Install with: npm i -g wrangler"
+  exit 1
+fi
+
+if [[ ! -f "${WRANGLER_TOML}" ]]; then
+  echo "Missing ${WRANGLER_TOML}"
+  echo "Run: npm run cf:bootstrap"
   exit 1
 fi
 
@@ -43,7 +52,7 @@ for key in "${required[@]}"; do
 done
 
 for key in "${required[@]}"; do
-  printf '%s' "${!key}" | wrangler secret put "${key}"
+  printf '%s' "${!key}" | wrangler secret put "${key}" --config "${WRANGLER_TOML}"
 done
 
 echo "Cloudflare Worker secrets updated."

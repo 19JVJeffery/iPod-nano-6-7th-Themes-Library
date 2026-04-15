@@ -7,6 +7,9 @@ set -euo pipefail
 WORKER_NAME="${1:-nano-theme-library-api}"
 R2_BUCKET="${2:-nano-theme-uploads}"
 KV_BINDING="SUBMISSIONS_KV"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORKER_DIR="${ROOT_DIR}/cloudflare-worker"
+WRANGLER_TOML="${WORKER_DIR}/wrangler.toml"
 
 echo "==> Checking wrangler"
 if ! command -v wrangler >/dev/null 2>&1; then
@@ -23,15 +26,17 @@ echo "${KV_OUTPUT}"
 
 KV_ID="$(printf '%s\n' "${KV_OUTPUT}" | sed -n 's/.*id = "\([^"]*\)".*/\1/p' | head -n1)"
 if [[ -z "${KV_ID}" ]]; then
+  KV_ID="$(printf '%s\n' "${KV_OUTPUT}" | sed -n 's/.*"id":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
+fi
+if [[ -z "${KV_ID}" ]]; then
   echo "Could not parse KV id from wrangler output. Copy it manually."
 else
   echo
   echo "KV namespace id detected: ${KV_ID}"
 fi
 
-echo
-echo "==> Next step: create cloudflare-worker/wrangler.toml"
-cat <<EOF
+echo "==> Writing ${WRANGLER_TOML}"
+cat > "${WRANGLER_TOML}" <<EOF
 name = "${WORKER_NAME}"
 main = "src/worker.mjs"
 compatibility_date = "2026-04-15"
@@ -50,6 +55,8 @@ MAX_UPLOAD_MB = "512"
 THEMES_SOURCE_URL = "https://raw.githubusercontent.com/19JVJeffery/iPod-nano-6-7th-Themes-Library/main/themes.json"
 EOF
 
+echo
+echo "Wrangler config created at: ${WRANGLER_TOML}"
 echo
 echo "==> Then set secrets:"
 cat <<'EOF'

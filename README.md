@@ -39,9 +39,9 @@ Backend source is in `cloudflare-worker/src/worker.mjs`.
    ```bash
    npm run cf:bootstrap
    ```
-3. Create `cloudflare-worker/wrangler.toml` from `cloudflare-worker/wrangler.toml.example` and paste:
-   - KV namespace id from step 2
-   - correct `ALLOWED_ORIGIN` (your exact Pages origin)
+3. `cf:bootstrap` writes `cloudflare-worker/wrangler.toml` automatically.
+   - If R2 is not enabled in your Cloudflare account, enable it in dashboard first, then re-run `npm run cf:bootstrap`.
+   - Check `ALLOWED_ORIGIN` in `cloudflare-worker/wrangler.toml` is your exact Pages origin.
 4. In Cloudflare dashboard, create Turnstile and copy:
    - Site key
    - Secret key
