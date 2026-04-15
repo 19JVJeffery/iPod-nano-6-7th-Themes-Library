@@ -23,13 +23,10 @@
     <main class="layout">
       <section class="panel panel--wide">
         <h2>Pending review queue</h2>
-        <p class="panel-copy">Sign in as admin to review pending uploads and approve/reject securely.</p>
-        <form id="admin-login-form" class="panel-row">
-          <input id="admin-password" type="password" placeholder="Admin password" autocomplete="current-password" required>
-          <button class="button button--primary" type="submit">Sign in</button>
-        </form>
+        <p class="panel-copy">Moderate by applying labels in GitHub Issues. Use <code>approved-for-import</code> to trigger import workflow.</p>
         <div class="submission-actions">
           <button class="button button--ghost" id="refresh-submissions" type="button">Refresh queue</button>
+          <a class="button button--ghost" href="https://github.com/19JVJeffery/iPod-nano-6-7th-Themes-Library/issues?q=is%3Aopen+label%3Atheme-submission+label%3Apending-review" target="_blank" rel="noopener noreferrer">Open pending issues</a>
         </div>
         <p id="admin-status" class="status"></p>
       </section>
@@ -37,7 +34,6 @@
       <section id="moderation-panel" class="submission-list"></section>
     </main>
 
-    <script src="config.js"></script>
     <script src="admin.js" defer></script>
   </body>
 </html>

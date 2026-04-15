@@ -1,0 +1,104 @@
+name: Import approved submission
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  import:
+    if: github.event.label.name == 'approved-for-import' && contains(github.event.issue.labels.*.name, 'theme-submission')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify moderator permission
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const actor = context.actor;
+            const perm = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: actor
+            });
+            const level = perm.data.permission;
+            if (!["admin", "maintain", "write"].includes(level)) {
+              core.setFailed(`Actor ${actor} does not have moderation permission (${level}).`);
+            }
+
+      - name: Setup Git LFS
+        run: git lfs install
+
+      - name: Parse issue body
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || "";
+            const read = (name) => {
+              const re = new RegExp(`-\\s+${name}:\\s*(.+)`, "i");
+              const m = body.match(re);
+              return m ? m[1].trim() : "";
+            };
+            const description = (body.split("### Description")[1] || "").trim();
+            const output = {
+              issue: String(context.payload.issue.number),
+              themeName: read("Theme Name"),
+              authorName: read("Author Name"),
+              device: read("Device"),
+              release: read("Release") || "Unknown",
+              previewImage: read("Preview Image URL"),
+              tags: read("Tags"),
+              ipswUrl: read("IPSW URL"),
+              description: description || "Community submission"
+            };
+            for (const key of ["themeName", "authorName", "device", "ipswUrl"]) {
+              if (!output[key]) core.setFailed(`Missing field: ${key}`);
+            }
+            if (!output.ipswUrl.toLowerCase().includes(".ipsw")) {
+              core.setFailed("IPSW URL must point to a .ipsw file");
+            }
+            for (const [k, v] of Object.entries(output)) core.setOutput(k, v);
+
+      - name: Import approved IPSW into repo
+        run: |
+          node scripts/import-approved.js \
+            --issue "${{ steps.parse.outputs.issue }}" \
+            --theme-name "${{ steps.parse.outputs.themeName }}" \
+            --author-name "${{ steps.parse.outputs.authorName }}" \
+            --device "${{ steps.parse.outputs.device }}" \
+            --release "${{ steps.parse.outputs.release }}" \
+            --description "${{ steps.parse.outputs.description }}" \
+            --preview-image "${{ steps.parse.outputs.previewImage }}" \
+            --tags "${{ steps.parse.outputs.tags }}" \
+            --ipsw-url "${{ steps.parse.outputs.ipswUrl }}"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add themes.json ipsw
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Import approved submission #${{ steps.parse.outputs.issue }}"
+          git push origin HEAD:main
+
+      - name: Add imported label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              labels: ["imported"]
+            });

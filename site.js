@@ -6,8 +6,6 @@ const statTotal = document.getElementById("stat-total");
 const stat6G = document.getElementById("stat-6g");
 const stat7G = document.getElementById("stat-7g");
 const statReady = document.getElementById("stat-ready");
-const config = window.NANO_CONFIG || {};
-const apiBase = (config.API_BASE_URL || "").replace(/\/+$/, "");
 
 let themes = [];
 
@@ -121,16 +119,10 @@ const render = () => {
 };
 
 const load = async () => {
-  let response = null;
-  if (apiBase) {
-    response = await fetch(`${apiBase}/api/themes`, { cache: "no-store" });
-  }
-  if (!response || !response.ok) {
-    response = await fetch("themes.json", { cache: "no-store" });
-    if (!response.ok) {
-      themeGrid.innerHTML = "<p>Failed to load theme data.</p>";
-      return;
-    }
+  const response = await fetch("themes.json", { cache: "no-store" });
+  if (!response.ok) {
+    themeGrid.innerHTML = "<p>Failed to load theme data.</p>";
+    return;
   }
   themes = await response.json();
   setStats();
