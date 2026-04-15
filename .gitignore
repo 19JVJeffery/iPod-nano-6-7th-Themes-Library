@@ -1,3 +1,5 @@
 node_modules/
 .netlify/
 .env
+cloudflare-worker/.secrets.env
+cloudflare-worker/.wrangler/

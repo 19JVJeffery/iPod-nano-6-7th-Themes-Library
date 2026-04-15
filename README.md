@@ -18,12 +18,42 @@ GitHub Pages frontend with secure upload/moderation backend.
 
 Backend source is in `cloudflare-worker/src/worker.mjs`.
 
-1. Create:
-   - an R2 bucket (upload storage),
-   - a KV namespace (submission metadata),
-   - a Turnstile site + secret key.
-2. Copy `cloudflare-worker/wrangler.toml.example` to `cloudflare-worker/wrangler.toml` and fill values.
-3. Set secrets:
+### What is already prepared in this repo
+
+- Worker backend code (`cloudflare-worker/src/worker.mjs`)
+- Wrangler config template (`cloudflare-worker/wrangler.toml.example`)
+- Frontend config hook (`config.js`)
+- Helper scripts:
+  - `npm run cf:bootstrap`
+  - `npm run cf:set-secrets`
+  - `npm run cf:deploy`
+
+### Exact setup steps
+
+1. Install and login:
+   ```bash
+   npm i -g wrangler
+   wrangler login
+   ```
+2. Bootstrap Cloudflare resources (creates R2 bucket and KV namespace, prints a ready `wrangler.toml` block):
+   ```bash
+   npm run cf:bootstrap
+   ```
+3. Create `cloudflare-worker/wrangler.toml` from `cloudflare-worker/wrangler.toml.example` and paste:
+   - KV namespace id from step 2
+   - correct `ALLOWED_ORIGIN` (your exact Pages origin)
+4. In Cloudflare dashboard, create Turnstile and copy:
+   - Site key
+   - Secret key
+5. Copy secrets template and fill it:
+   ```bash
+   cp cloudflare-worker/.secrets.env.example cloudflare-worker/.secrets.env
+   ```
+6. Push secrets from file:
+   ```bash
+   npm run cf:set-secrets -- cloudflare-worker/.secrets.env
+   ```
+   (Equivalent manual commands if needed:)
    ```bash
    cd cloudflare-worker
    wrangler secret put ADMIN_PASSWORD
@@ -35,14 +65,14 @@ Backend source is in `cloudflare-worker/src/worker.mjs`.
    wrangler secret put R2_SECRET_ACCESS_KEY
    wrangler secret put R2_PUBLIC_BASE_URL
    ```
-4. Deploy:
+7. Deploy Worker:
    ```bash
-   wrangler deploy
+   npm run cf:deploy
    ```
-5. Update root `config.js`:
+8. Update root `config.js`:
    - `API_BASE_URL`: deployed Worker URL
    - `TURNSTILE_SITE_KEY`: Turnstile site key
-6. In Worker vars, set `ALLOWED_ORIGIN` to your GitHub Pages origin exactly.
+9. Commit and push `config.js` (and `wrangler.toml` if you choose to keep it in repo).
 
 ## Security controls included
 
