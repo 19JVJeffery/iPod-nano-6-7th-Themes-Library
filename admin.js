@@ -1,12 +1,21 @@
 const statusEl = document.getElementById("admin-status");
 const panel = document.getElementById("moderation-panel");
 const refreshButton = document.getElementById("refresh-submissions");
-const owner = "19JVJeffery";
-const repo = "iPod-nano-6-7th-Themes-Library";
+const loginForm = document.getElementById("admin-login-form");
+const passwordInput = document.getElementById("admin-password");
+const config = window.NANO_CONFIG || {};
+const apiBase = (config.API_BASE_URL || "").replace(/\/+$/, "");
+const tokenKey = "nano_admin_token";
 
 const setStatus = (message, isError = false) => {
   statusEl.textContent = message;
   statusEl.className = isError ? "status error" : "status";
+};
+
+const tokenStore = {
+  get: () => sessionStorage.getItem(tokenKey) || "",
+  set: (value) => sessionStorage.setItem(tokenKey, value),
+  clear: () => sessionStorage.removeItem(tokenKey)
 };
 
 const escapeHtml = (value) =>
@@ -17,85 +26,63 @@ const escapeHtml = (value) =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 
-const parseField = (body, field) => {
-  const regex = new RegExp(`-\\s+${field}:\\s*(.+)`, "i");
-  const match = (body || "").match(regex);
-  return match ? match[1].trim() : "";
+const api = async (path, options = {}) => {
+  if (!apiBase) throw new Error("Missing API config. Set window.NANO_CONFIG.API_BASE_URL in config.js");
+  const headers = { ...(options.headers || {}) };
+  const token = tokenStore.get();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const response = await fetch(`${apiBase}${path}`, { ...options, headers });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "Request failed");
+  return data;
 };
 
-const shellEscape = (value) => `'${String(value).replaceAll("'", "'\\''")}'`;
-
-const createImportCommand = (issue, parsed) =>
-  `node scripts/import-approved.js --issue ${issue.number} --theme-name ${shellEscape(parsed.themeName)} --author-name ${shellEscape(
-    parsed.authorName
-  )} --device ${shellEscape(parsed.device)} --release ${shellEscape(parsed.release || "Unknown")} --description ${shellEscape(
-    parsed.description || "Community submission"
-  )} --preview-image ${shellEscape(parsed.previewImage)} --tags ${shellEscape(parsed.tags || "")} --ipsw-url ${shellEscape(parsed.ipswUrl)}`;
-
-const parseIssue = (issue) => ({
-  themeName: parseField(issue.body, "Theme Name"),
-  authorName: parseField(issue.body, "Author Name"),
-  device: parseField(issue.body, "Device"),
-  release: parseField(issue.body, "Release"),
-  previewImage: parseField(issue.body, "Preview Image URL"),
-  tags: parseField(issue.body, "Tags"),
-  ipswUrl: parseField(issue.body, "IPSW URL"),
-  description: (issue.body || "").split("### Description")[1]?.trim() || "",
-  createdAt: issue.created_at
-});
-
-const copyText = async (text) => {
-  await navigator.clipboard.writeText(text);
-};
-
-const renderSubmissions = (issues) => {
-  if (!issues.length) {
+const renderSubmissions = (items) => {
+  if (!items.length) {
     panel.innerHTML = `<section class="panel panel--wide"><h2>No pending submissions</h2><p class="panel-copy">Queue is clear.</p></section>`;
     return;
   }
 
-  panel.innerHTML = issues
-    .map((issue) => {
-      const parsed = parseIssue(issue);
-      const importCommand = createImportCommand(issue, parsed);
-      const created = new Date(parsed.createdAt).toLocaleString();
-      return `
+  panel.innerHTML = items
+    .map(
+      (item) => `
       <article class="submission-card">
-        <h3>#${issue.number}: ${escapeHtml(parsed.themeName || issue.title)}</h3>
-        <p><strong>Submitted:</strong> ${escapeHtml(created)}</p>
-        <p><strong>Author:</strong> ${escapeHtml(parsed.authorName || "Unknown")} • <strong>Device:</strong> ${escapeHtml(parsed.device || "Unknown")}</p>
-        <p><strong>Release:</strong> ${escapeHtml(parsed.release || "Unknown")}</p>
-        <p><strong>IPSW URL:</strong> <a href="${escapeHtml(parsed.ipswUrl)}" target="_blank" rel="noopener noreferrer">Open source file</a></p>
-        <p>${escapeHtml(parsed.description || "No description provided.")}</p>
-        <textarea readonly>${importCommand}</textarea>
+        <h3>#${escapeHtml(item.pullNumber)} ${escapeHtml(item.title)}</h3>
+        <p><strong>Author:</strong> ${escapeHtml(item.authorName || "Unknown")} • <strong>Device:</strong> ${escapeHtml(item.device || "Unknown")}</p>
+        <p><strong>File:</strong> ${escapeHtml(item.fileName || "unknown")}</p>
+        <p>${escapeHtml(item.description || "No description")}</p>
         <div class="submission-actions">
-          <button class="button button--primary" data-copy="${escapeHtml(importCommand)}">Copy import command</button>
-          <a class="button button--ghost" href="${issue.html_url}" target="_blank" rel="noopener noreferrer">Open issue</a>
+          <button class="button button--primary" data-action="approve" data-pr="${escapeHtml(item.pullNumber)}">Approve</button>
+          <button class="button button--ghost" data-action="reject" data-pr="${escapeHtml(item.pullNumber)}">Reject</button>
+          <a class="button button--ghost" target="_blank" rel="noopener noreferrer" href="${escapeHtml(item.pullUrl)}">Open PR</a>
         </div>
       </article>
-    `;
-    })
+    `
+    )
     .join("");
 };
 
 const loadPending = async () => {
-  const url = `https://api.github.com/repos/${owner}/${repo}/issues?state=open&labels=theme-submission,pending-review&per_page=100`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("Failed to load pending submissions from GitHub API");
-  const issues = await response.json();
-  const submissions = issues.filter((issue) => !issue.pull_request);
-  renderSubmissions(submissions);
-  setStatus(`Loaded ${submissions.length} pending submission(s).`);
+  const data = await api("/api/admin/submissions");
+  renderSubmissions(data.items || []);
+  setStatus(`Loaded ${(data.items || []).length} pending submission(s).`);
 };
 
-panel.addEventListener("click", async (event) => {
-  const button = event.target.closest("button[data-copy]");
-  if (!button) return;
+loginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
   try {
-    await copyText(button.dataset.copy);
-    setStatus("Import command copied.");
+    const data = await api("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: passwordInput.value })
+    });
+    tokenStore.set(data.token);
+    passwordInput.value = "";
+    setStatus("Signed in.");
+    await loadPending();
   } catch (error) {
-    setStatus(error.message || "Could not copy command", true);
+    tokenStore.clear();
+    setStatus(error.message, true);
   }
 });
 
@@ -103,4 +90,27 @@ refreshButton.addEventListener("click", () => {
   loadPending().catch((error) => setStatus(error.message, true));
 });
 
-loadPending().catch((error) => setStatus(error.message, true));
+panel.addEventListener("click", async (event) => {
+  const button = event.target.closest("button[data-action][data-pr]");
+  if (!button) return;
+  const action = button.dataset.action;
+  const pullNumber = Number(button.dataset.pr);
+  if (!Number.isFinite(pullNumber)) return;
+  try {
+    button.disabled = true;
+    await api("/api/admin/decision", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, pullNumber })
+    });
+    await loadPending();
+  } catch (error) {
+    setStatus(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+if (tokenStore.get()) {
+  loadPending().catch((error) => setStatus(error.message, true));
+}

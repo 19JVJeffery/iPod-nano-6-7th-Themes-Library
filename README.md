@@ -1,54 +1,87 @@
 # Nano Theme Library
 
-GitHub Pages + GitHub LFS theme library for iPod nano 6/7.
+GitHub Pages frontend + GitHub LFS storage, with a lightweight backend that calls GitHub LFS batch API to support direct browser uploads.
 
-## What this uses
+## Architecture
 
-- Frontend: static pages on GitHub Pages
-- File storage: GitHub repository (`/ipsw`) tracked by Git LFS
-- Moderation: GitHub Issues + GitHub Actions
+- **Frontend (GitHub Pages):** `index.html`, `submit.html`, `admin.html`
+- **Storage:** GitHub repo `ipsw/` tracked by Git LFS
+- **Backend (no external file storage):** Cloudflare Worker in `lfs-worker/`
+  - requests LFS upload instructions from GitHub
+  - finalizes uploads into moderated pull requests
+  - supports admin approve/reject actions
 
-## Important limitation
+## Why this backend is required
 
-GitHub Pages cannot securely accept direct anonymous browser uploads into your repo/LFS.
-
-So the secure GitHub-only flow is:
-1. User submits metadata + direct `.ipsw` URL in `submit.html`
-2. You moderate in `admin.html` / GitHub Issues
-3. Add `approved-for-import` label
-4. GitHub Action imports file into `/ipsw` (LFS), updates `themes.json`, and pushes to `main`
+A static site cannot safely upload directly to your GitHub LFS without exposing credentials.  
+The Worker keeps credentials server-side and only returns short-lived upload instructions.
 
 ## Setup
 
-1. Enable GitHub Pages from `main` branch root.
-2. Install Git LFS locally and once per machine:
+1. **GitHub Pages**
+   - Enable Pages from `main` branch root.
+
+2. **Git LFS**
    ```bash
    git lfs install
    ```
-3. Keep `.gitattributes` committed (`*.ipsw` already tracked).
 
-## Moderation security (recommended)
+3. **Create GitHub App** (recommended security)
+   - Permissions:
+     - Contents: Read/Write
+     - Pull requests: Read/Write
+     - Issues: Read/Write
+     - Metadata: Read
+   - Install app on this repo.
+   - Collect:
+     - App ID
+     - Installation ID
+     - Private key PEM
 
-1. Enable branch protection on `main` (require pull requests and approvals if you prefer stricter control).
-2. Restrict who can apply labels / write to repo.
-3. Use labels:
-   - `theme-submission`
-   - `pending-review`
-   - `approved-for-import`
-   - `imported`
-4. Workflow `.github/workflows/import-approved-submission.yml` only imports when:
-   - issue has `theme-submission`
-   - `approved-for-import` label is added
-   - labeling actor has `write/maintain/admin` permission
+4. **Deploy Worker backend**
+   - Copy `lfs-worker/wrangler.toml.example` → `lfs-worker/wrangler.toml`
+   - Set vars (`ALLOWED_ORIGIN`, owner/repo/base branch)
+   - Set secrets:
+     ```bash
+     cd lfs-worker
+     wrangler secret put ADMIN_PASSWORD
+     wrangler secret put ADMIN_TOKEN_SECRET
+     wrangler secret put STATE_TOKEN_SECRET
+     wrangler secret put GITHUB_APP_ID
+     wrangler secret put GITHUB_APP_INSTALLATION_ID
+     wrangler secret put GITHUB_APP_PRIVATE_KEY
+     wrangler deploy --config wrangler.toml
+     ```
 
-## Local commands
+5. **Frontend config**
+   - Edit root `config.js`:
+     ```js
+     window.NANO_CONFIG = {
+       API_BASE_URL: "https://<your-worker>.workers.dev"
+     };
+     ```
+   - Commit/push.
 
-Validate scripts:
+## User flow
+
+1. User selects `.ipsw` file in `submit.html`.
+2. Browser hashes file and calls backend `/api/lfs/start`.
+3. Backend requests GitHub LFS batch upload instructions.
+4. Browser uploads file directly to LFS upload URL.
+5. Browser calls `/api/lfs/complete`.
+6. Backend creates a moderation PR containing:
+   - LFS pointer file under `ipsw/community/...`
+   - updated `themes.json` entry
+
+## Admin moderation flow
+
+1. Admin signs in on `admin.html`.
+2. Backend lists pending submission PRs.
+3. Approve → backend merges PR.
+4. Reject → backend closes PR.
+
+## Local checks
+
 ```bash
 npm run check
-```
-
-Manual import (if needed):
-```bash
-node scripts/import-approved.js --issue <number> --theme-name "<name>" --author-name "<author>" --device "iPod nano 7G" --release "<release>" --description "<desc>" --preview-image "<preview-url>" --tags "<comma,tags>" --ipsw-url "<direct-ipsw-url>"
 ```

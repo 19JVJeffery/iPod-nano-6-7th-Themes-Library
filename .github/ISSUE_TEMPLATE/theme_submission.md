@@ -25,4 +25,4 @@ Describe the theme and any notes for installation.
 Maintainer moderation:
 1. Review submission
 2. Keep label `pending-review` until approved
-3. Add label `approved-for-import` to trigger GitHub Action import into Git LFS
+3. Use admin dashboard/backend flow to approve (merge) or reject (close)

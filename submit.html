@@ -23,7 +23,7 @@
     <main class="layout">
       <section class="panel panel--wide">
         <h2>Theme Submission</h2>
-        <p class="panel-copy">GitHub Pages cannot securely accept direct large file uploads. Submit a direct IPSW URL for moderation/import.</p>
+        <p class="panel-copy">Upload an IPSW from your browser. It is sent to GitHub LFS, then opened as a moderated pull request.</p>
         <form id="submit-form">
           <div class="panel-row">
             <input required name="themeName" placeholder="Theme name" maxlength="120">
@@ -40,8 +40,8 @@
           <input required name="previewImage" type="url" placeholder="Preview image URL">
           <input name="tags" placeholder="Tags (comma separated, e.g. dark,anime,minimal)">
           <textarea required name="description" placeholder="Theme description" maxlength="700"></textarea>
-          <input required name="ipswUrl" type="url" placeholder="Direct IPSW download URL (.ipsw link)">
-          <button class="button button--primary" type="submit">Create moderated submission</button>
+          <input required name="ipswFile" type="file" accept=".ipsw,application/octet-stream">
+          <button class="button button--primary" type="submit">Upload and create moderated PR</button>
           <p id="submit-status" class="status"></p>
         </form>
       </section>
@@ -49,13 +49,14 @@
       <section class="panel panel--wide">
         <h2>Submission rules</h2>
         <ul class="rules">
-          <li>Provide a direct <code>.ipsw</code> URL (no short-lived one-time links).</li>
+          <li>Only valid <code>.ipsw</code> files are accepted.</li>
           <li>Add at least one clear preview image URL.</li>
           <li>Use honest tags and release notes so people can find your style.</li>
         </ul>
       </section>
     </main>
 
+    <script src="config.js"></script>
     <script src="submit.js" defer></script>
   </body>
 </html>
