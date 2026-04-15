@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "GitHub Pages-hosted iPod nano themes library with moderated IPSW submissions.",
   "scripts": {
-    "check": "node --check site.js && node --check submit.js && node --check admin.js && node --check scripts/import-approved.js",
+    "check": "node --check site.js && node --check submit.js && node --check admin.js && node --check scripts/import-approved.js && node --check cloudflare-worker/src/worker.mjs",
     "import:approved": "node scripts/import-approved.js"
   },
   "dependencies": {}

@@ -23,9 +23,13 @@
     <main class="layout">
       <section class="panel panel--wide">
         <h2>Pending review queue</h2>
-        <p class="panel-copy">Only maintainers can approve by updating issue labels/closing issues and then importing locally.</p>
+        <p class="panel-copy">Sign in as admin to review pending uploads and approve/reject securely.</p>
+        <form id="admin-login-form" class="panel-row">
+          <input id="admin-password" type="password" placeholder="Admin password" autocomplete="current-password" required>
+          <button class="button button--primary" type="submit">Sign in</button>
+        </form>
         <div class="submission-actions">
-          <a class="button button--ghost" href="https://github.com/19JVJeffery/iPod-nano-6-7th-Themes-Library/issues?q=is%3Aopen+label%3Apending-review+label%3Atheme-submission" target="_blank" rel="noopener noreferrer">Open Pending Issues on GitHub</a>
+          <button class="button button--ghost" id="refresh-submissions" type="button">Refresh queue</button>
         </div>
         <p id="admin-status" class="status"></p>
       </section>
@@ -33,6 +37,7 @@
       <section id="moderation-panel" class="submission-list"></section>
     </main>
 
+    <script src="config.js"></script>
     <script src="admin.js" defer></script>
   </body>
 </html>

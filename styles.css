@@ -185,6 +185,10 @@ textarea:focus-visible,
   gap: 0.65rem;
 }
 
+#turnstile-container {
+  min-height: 66px;
+}
+
 .panel-row {
   display: grid;
   gap: 0.65rem;
