@@ -3,41 +3,25 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin Dashboard - iPod nano Themes</title>
+    <title>Admin Portal Moved</title>
     <link rel="icon" href="assets/favicon.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body class="page page-admin">
-    <div class="bg-glow bg-glow--one"></div>
-    <div class="bg-glow bg-glow--two"></div>
     <header class="hero">
-      <p class="eyebrow">MODERATION PANEL</p>
-      <h1>Curation dashboard</h1>
-      <p class="hero__lead">Review pending submissions and copy local import commands for approved themes.</p>
+      <p class="eyebrow">PRIVATE ADMIN</p>
+      <h1>Admin portal moved</h1>
+      <p class="hero__lead">Moderation is now hosted in a separate private repository and is not exposed on this public site.</p>
       <nav class="top-nav">
         <a class="button button--ghost" href="index.html">Back to Library</a>
-        <a class="button button--ghost" href="submit.html">Submission Form</a>
       </nav>
     </header>
 
     <main class="layout">
       <section class="panel panel--wide">
-        <h2>Pending review queue</h2>
-        <p class="panel-copy">Sign in, review pending PR submissions, and approve/reject directly.</p>
-        <form id="admin-login-form" class="panel-row">
-          <input id="admin-password" type="password" placeholder="Admin password" required autocomplete="current-password">
-          <button class="button button--primary" type="submit">Sign in</button>
-        </form>
-        <div class="submission-actions">
-          <button class="button button--ghost" id="refresh-submissions" type="button">Refresh queue</button>
-        </div>
-        <p id="admin-status" class="status"></p>
+        <h2>Maintainer note</h2>
+        <p class="panel-copy">Use the private AUTH repository deployment to review and approve submissions.</p>
       </section>
-
-      <section id="moderation-panel" class="submission-list"></section>
     </main>
-
-    <script src="config.js"></script>
-    <script src="admin.js" defer></script>
   </body>
 </html>

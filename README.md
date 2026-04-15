@@ -1,15 +1,13 @@
 # Nano Theme Library
 
-GitHub Pages frontend + GitHub LFS storage, with a lightweight backend that calls GitHub LFS batch API to support direct browser uploads.
+Public frontend + GitHub LFS storage. Private moderation/backend now lives in:
+`19JVJeffery/AUTH-iPod-nano-6-7th-Themes-Library`
 
 ## Architecture
 
-- **Frontend (GitHub Pages):** `index.html`, `submit.html`, `admin.html`
+- **Frontend (GitHub Pages):** `index.html`, `submit.html`
 - **Storage:** GitHub repo `ipsw/` tracked by Git LFS
-- **Backend (no external file storage):** Cloudflare Worker in `lfs-worker/`
-  - requests LFS upload instructions from GitHub
-  - finalizes uploads into moderated pull requests
-  - supports admin approve/reject actions
+- **Private admin/backend:** AUTH repo (dashboard + worker)
 
 ## Why this backend is required
 
@@ -26,34 +24,7 @@ The Worker keeps credentials server-side and only returns short-lived upload ins
    git lfs install
    ```
 
-3. **Create GitHub App** (recommended security)
-   - Permissions:
-     - Contents: Read/Write
-     - Pull requests: Read/Write
-     - Issues: Read/Write
-     - Metadata: Read
-   - Install app on this repo.
-   - Collect:
-     - App ID
-     - Installation ID
-     - Private key PEM
-
-4. **Deploy Worker backend**
-   - Copy `lfs-worker/wrangler.toml.example` → `lfs-worker/wrangler.toml`
-   - Set vars (`ALLOWED_ORIGIN`, owner/repo/base branch)
-   - Set secrets:
-     ```bash
-     cd lfs-worker
-     wrangler secret put ADMIN_PASSWORD
-     wrangler secret put ADMIN_TOKEN_SECRET
-     wrangler secret put STATE_TOKEN_SECRET
-     wrangler secret put GITHUB_APP_ID
-     wrangler secret put GITHUB_APP_INSTALLATION_ID
-     wrangler secret put GITHUB_APP_PRIVATE_KEY
-     wrangler deploy --config wrangler.toml
-     ```
-
-5. **Frontend config**
+3. **Frontend config**
    - Edit root `config.js`:
      ```js
      window.NANO_CONFIG = {
@@ -75,10 +46,7 @@ The Worker keeps credentials server-side and only returns short-lived upload ins
 
 ## Admin moderation flow
 
-1. Admin signs in on `admin.html`.
-2. Backend lists pending submission PRs.
-3. Approve → backend merges PR.
-4. Reject → backend closes PR.
+Admin dashboard is private and handled in AUTH repo.
 
 ## Local checks
 

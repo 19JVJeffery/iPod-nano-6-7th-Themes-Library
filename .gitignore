@@ -1,5 +1,3 @@
 node_modules/
 .netlify/
 .env
-lfs-worker/.secrets.env
-lfs-worker/.wrangler/
