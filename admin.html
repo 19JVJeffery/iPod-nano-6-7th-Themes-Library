@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard - iPod nano Themes</title>
+    <link rel="icon" href="assets/favicon.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="page page-admin">
+    <div class="bg-glow bg-glow--one"></div>
+    <div class="bg-glow bg-glow--two"></div>
+    <header class="hero">
+      <p class="eyebrow">MODERATION PANEL</p>
+      <h1>Curation dashboard</h1>
+      <p class="hero__lead">Review pending submissions and copy local import commands for approved themes.</p>
+      <nav class="top-nav">
+        <a class="button button--ghost" href="index.html">Back to Library</a>
+        <a class="button button--ghost" href="submit.html">Submission Form</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <section class="panel panel--wide">
+        <h2>Pending review queue</h2>
+        <p class="panel-copy">Only maintainers can approve by updating issue labels/closing issues and then importing locally.</p>
+        <div class="submission-actions">
+          <a class="button button--ghost" href="https://github.com/19JVJeffery/iPod-nano-6-7th-Themes-Library/issues?q=is%3Aopen+label%3Apending-review+label%3Atheme-submission" target="_blank" rel="noopener noreferrer">Open Pending Issues on GitHub</a>
+        </div>
+        <p id="admin-status" class="status"></p>
+      </section>
+
+      <section id="moderation-panel" class="submission-list"></section>
+    </main>
+
+    <script src="admin.js" defer></script>
+  </body>
+</html>

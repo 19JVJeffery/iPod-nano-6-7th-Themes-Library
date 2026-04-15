@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nano Theme Library</title>
+    <meta name="description" content="Original iPod nano 6/7 community theme library.">
+    <meta property="og:title" content="Nano Theme Library">
+    <meta property="og:description" content="An original community library for iPod nano themes.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="assets/banner.png">
+    <link rel="icon" href="assets/favicon.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="page page-library">
+    <div class="bg-glow bg-glow--one"></div>
+    <div class="bg-glow bg-glow--two"></div>
+    <header class="hero">
+      <p class="eyebrow">COMMUNITY ARCHIVE</p>
+      <h1>Nano Theme Library</h1>
+      <p class="hero__lead">A custom-built home for iPod nano 6G/7G themes with moderated community submissions.</p>
+      <nav class="top-nav" aria-label="Primary">
+        <a class="button button--ghost" href="submit.html">Submit Theme</a>
+        <a class="button button--ghost" href="admin.html">Moderation</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <section class="stats-panel" aria-label="Library stats">
+        <article class="stat-tile">
+          <p class="stat-label">Themes</p>
+          <p id="stat-total" class="stat-value">0</p>
+        </article>
+        <article class="stat-tile">
+          <p class="stat-label">nano 6G</p>
+          <p id="stat-6g" class="stat-value">0</p>
+        </article>
+        <article class="stat-tile">
+          <p class="stat-label">nano 7G</p>
+          <p id="stat-7g" class="stat-value">0</p>
+        </article>
+        <article class="stat-tile">
+          <p class="stat-label">Downloads</p>
+          <p id="stat-ready" class="stat-value">0</p>
+        </article>
+      </section>
+
+      <section class="controls panel">
+        <div class="control">
+          <label for="search">Search</label>
+          <input id="search" type="search" placeholder="Theme, author, style, tags...">
+        </div>
+        <div class="control">
+          <label for="device">Device</label>
+          <select id="device">
+            <option value="">All devices</option>
+            <option value="iPod nano 6G">iPod nano 6G</option>
+            <option value="iPod nano 7G">iPod nano 7G</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="sort">Sort</label>
+          <select id="sort">
+            <option value="name-asc">Name A-Z</option>
+            <option value="name-desc">Name Z-A</option>
+            <option value="release-desc">Newest release</option>
+            <option value="release-asc">Oldest release</option>
+          </select>
+        </div>
+      </section>
+
+      <section id="theme-grid" class="theme-grid" aria-live="polite"></section>
+    </main>
+
+    <footer>
+      <p>Community submissions • Moderated publishing • GitHub Pages + LFS</p>
+    </footer>
+
+    <script src="site.js" defer></script>
+  </body>
+</html>

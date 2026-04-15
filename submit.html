@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Submit IPSW - iPod nano Themes</title>
+    <link rel="icon" href="assets/favicon.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="page page-submit">
+    <div class="bg-glow bg-glow--one"></div>
+    <div class="bg-glow bg-glow--two"></div>
+    <header class="hero">
+      <p class="eyebrow">COMMUNITY SUBMISSION</p>
+      <h1>Submit your theme</h1>
+      <p class="hero__lead">Share your IPSW and details. Each submission is reviewed before publishing.</p>
+      <nav class="top-nav">
+        <a class="button button--ghost" href="index.html">Back to Library</a>
+        <a class="button button--ghost" href="admin.html">Moderation</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <section class="panel panel--wide">
+        <h2>Theme Submission</h2>
+        <p class="panel-copy">You will be redirected to a prefilled GitHub issue with your metadata and IPSW link.</p>
+        <form id="submit-form">
+          <div class="panel-row">
+            <input required name="themeName" placeholder="Theme name" maxlength="120">
+            <input required name="authorName" placeholder="Author name / alias" maxlength="80">
+          </div>
+          <div class="panel-row">
+            <select name="device" required>
+              <option value="">Choose device</option>
+              <option value="iPod nano 6G">iPod nano 6G</option>
+              <option value="iPod nano 7G">iPod nano 7G</option>
+            </select>
+            <input name="release" placeholder="Release (e.g. 2015 or 2026 Remaster)">
+          </div>
+          <input required name="previewImage" type="url" placeholder="Preview image URL">
+          <input name="tags" placeholder="Tags (comma separated, e.g. dark,anime,minimal)">
+          <textarea required name="description" placeholder="Theme description" maxlength="700"></textarea>
+          <input required name="ipswUrl" type="url" placeholder="Direct IPSW download URL (.ipsw link)">
+          <button class="button button--primary" type="submit">Open GitHub Submission Issue</button>
+          <p id="submit-status" class="status"></p>
+        </form>
+      </section>
+
+      <section class="panel panel--wide">
+        <h2>Submission rules</h2>
+        <ul class="rules">
+          <li>Give a direct, stable IPSW link (no expired one-time share links).</li>
+          <li>Add at least one clear preview image.</li>
+          <li>Use honest tags and release notes so people can find your style.</li>
+        </ul>
+      </section>
+    </main>
+
+    <script src="submit.js" defer></script>
+  </body>
+</html>

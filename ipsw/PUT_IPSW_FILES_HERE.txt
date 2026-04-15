@@ -1,0 +1,2 @@
+Add your .ipsw files in this folder.
+They are tracked by Git LFS using the repository .gitattributes file.

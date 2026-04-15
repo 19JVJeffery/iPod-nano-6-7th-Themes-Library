@@ -1,0 +1,11 @@
+{
+  "name": "ipod-nano-themes-library",
+  "private": true,
+  "version": "1.0.0",
+  "description": "GitHub Pages-hosted iPod nano themes library with moderated IPSW submissions.",
+  "scripts": {
+    "check": "node --check site.js && node --check submit.js && node --check admin.js && node --check scripts/import-approved.js",
+    "import:approved": "node scripts/import-approved.js"
+  },
+  "dependencies": {}
+}
